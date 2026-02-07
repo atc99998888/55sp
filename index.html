@@ -1,112 +1,212 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>Future Tech Navigation</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <style>
-    /* === 所有样式保持不变 === */
-    html,body{margin:0;padding:0;height:100%;width:100vw;background:#0a1022;font-family:'Segoe UI','微软雅黑',Arial,sans-serif;overflow:hidden;}
-    #bg-canvas{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:0;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的小小星球</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(to bottom, #0a0a0a, #1f1f1f);
+            color: #f0f0f0;
+            line-height: 1.7;
+            text-align: center;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 30px 50px;
+        }
+        .header {
+            background: #121212;
+            padding: 30px 30px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            height: 180px;
+        }
+        .rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .rain span {
+            position: absolute;
+            font-size: 2.5em;
+            color: #d4af37;
+            opacity: 0.8;
+            animation: fall linear infinite;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(300px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        /* 为每个金币设置不同的位置、速度和延迟，实现自然掉落效果 */
+        .rain span:nth-child(1) { left: 5%; animation-duration: 4s; animation-delay: 0s; }
+        .rain span:nth-child(2) { left: 15%; animation-duration: 5s; animation-delay: 0.5s; }
+        .rain span:nth-child(3) { left: 25%; animation-duration: 3.5s; animation-delay: 1s; }
+        .rain span:nth-child(4) { left: 35%; animation-duration: 4.5s; animation-delay: 1.5s; }
+        .rain span:nth-child(5) { left: 45%; animation-duration: 4s; animation-delay: 2s; }
+        .rain span:nth-child(6) { left: 55%; animation-duration: 5.5s; animation-delay: 2.5s; }
+        .rain span:nth-child(7) { left: 65%; animation-duration: 3.8s; animation-delay: 3s; }
+        .rain span:nth-child(8) { left: 75%; animation-duration: 4.2s; animation-delay: 0.2s; }
+        .rain span:nth-child(9) { left: 85%; animation-duration: 4.8s; animation-delay: 0.8s; }
+        .rain span:nth-child(10) { left: 95%; animation-duration: 5.2s; animation-delay: 1.2s; }
+        .rain span:nth-child(11) { left: 10%; animation-duration: 3.6s; animation-delay: 1.8s; }
+        .rain span:nth-child(12) { left: 50%; animation-duration: 4.6s; animation-delay: 2.2s; }
 
-    /* ── 广播条 ── */
-    .adv-bar{position:absolute;top:1.2vw;left:50%;transform:translateX(-50%);width:76vw;max-width:740px;min-width:120px;height:38px;border-radius:24px;background:#232323;box-shadow:0 0 14px 3px #ee6cff90;display:flex;align-items:center;overflow:hidden;z-index:10;animation:breath-glow 2.2s ease-in-out infinite alternate;}
-    @keyframes breath-glow{0%{box-shadow:0 0 14px 3px #ee6cffbb;}100%{box-shadow:0 0 24px 5px #ea59ffcc;}}
-    .marquee{width:100%;overflow:hidden;height:100%;display:flex;align-items:center;position:relative;padding-left:1.2vw;padding-right:1vw;user-select:none;}
-    .marquee-content{font-size:1.27rem;font-weight:bold;letter-spacing:.06em;background:linear-gradient(90deg,#41fff3 0%,#3cb3ff 20%,#1a2efd 32%,#903af5 52%,#ff72a3 60%,#ff3b27 70%,#ffd944 77%,#37e839 86%,#0ce723 98%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-fill-color:transparent;text-shadow:0 2px 10px #c040ff33,0 1px 0 #fff6;white-space:nowrap;position:relative;left:0;}
-    .adv-addr{font-weight:bold;background:linear-gradient(90deg,#ff97a7 15%,#ff2a10 38%,#ffc100 60%,#3cff00 87%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-fill-color:transparent;padding:0 .22em;}
-    .adv-l,.adv-r{color:#36e30c;font-weight:900;font-size:1em;padding:0 .09em;}
-
-    /* ── 主区 ── */
-    .center-content{position:absolute;left:50%;top:50%;transform:translate(-50%,-47%);display:flex;flex-direction:column;align-items:center;z-index:2;width:95vw;max-width:360px;}
-
-    nav{width:100%;display:flex;flex-direction:column;gap:20px;align-items:center;justify-content:center;margin-bottom:2.1em;padding:0 16px;box-sizing:border-box;}
-
-    /* ── 按钮（无放大，仅发光） ── */
-    .nav-btn{
-      width:100%;background:linear-gradient(90deg,#2c38ff 30%,#18ffe8 95%);
-      color:#fff;font-size:20px;font-weight:700;border:none;border-radius:16px;
-      cursor:pointer;padding:18px 0;letter-spacing:.1em;
-      box-shadow:0 0 22px #0ef8ff36,0 4px 28px #151558b3;
-      transition:box-shadow .17s,filter .14s;
-      display:flex;align-items:center;justify-content:center;
-      backdrop-filter:blur(1.5px);filter:brightness(1.07);
-      position:relative;overflow:hidden;
-    }
-    .nav-btn:hover,.nav-btn:focus{
-      box-shadow:0 0 44px #39f7ffcc,0 8px 48px #000c;
-      filter:brightness(1.15) drop-shadow(0 0 10px #36f6fa);
-    }
-    .nav-btn:active{filter:brightness(1) blur(1.1px);}
-    .nav-btn::after{content:'';position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(80deg,rgba(255,255,255,.06) 30%,rgba(255,255,255,.18) 70%,transparent 100%);opacity:.8;pointer-events:none;}
-
-    /* ── 备案 ── */
-    .footer-en{position:fixed;left:0;bottom:0;width:100vw;text-align:center;color:#aaa;font-size:.95rem;letter-spacing:.02em;background:rgba(240,245,255,.01);padding:.62em 0 .12em 0;z-index:10;font-family:'Segoe UI',Arial,sans-serif;text-shadow:0 2px 8px #fff5,0 1px 0 #0003;}
-
-    /* ── 弹窗 ── */
-    .modal-mask{position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(40,40,60,.30);z-index:100;display:flex;align-items:center;justify-content:center;animation:fadeIn .22s;}
-    @keyframes fadeIn{0%{opacity:0;}100%{opacity:1;}}
-    .modal-box{min-width:180px;max-width:90vw;background:rgba(24,18,46,.95);color:#fff;font-size:1.32rem;font-weight:600;border-radius:20px;box-shadow:0 0 26px #c85fff55,0 2px 8px #fff3;text-align:center;padding:1.2em 2.1em;border:2px solid #b043ff77;animation:popUp .2s;}
-    @keyframes popUp{0%{transform:scale(.91);}100%{transform:scale(1);}}
-
-    @media(max-width:700px){
-      .adv-bar{height:32px;min-width:72px;width:97vw;}
-      .marquee-content{font-size:.88rem;}
-      .nav-btn{font-size:18px;}
-      .center-content{max-width:95vw;}
-      .footer-en{font-size:.80rem;}
-    }
-  </style>
+        .highlight {
+            color: #d4af37;
+            font-weight: 700;
+        }
+        .section {
+            margin: 30px 0;
+            font-size: 1.4em;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+        .benefits {
+            text-align: left;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .benefits p {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #d4af37;
+            margin-bottom: 20px;
+        }
+        .benefits li {
+            margin: 25px 0;
+            padding-left: 40px;
+            position: relative;
+            font-size: 1.3em;
+        }
+        .benefits li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+            color: #d4af37;
+            font-size: 1.5em;
+        }
+        .cta {
+            display: inline-block;
+            margin: 30px 0;
+            padding: 20px 60px;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            color: #0a0a0a;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .cta:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.6);
+        }
+        .images-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 40px auto;
+            max-width: 900px;
+        }
+        .img-placeholder {
+            width: 32%;
+            margin: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+        }
+        .img-placeholder:hover {
+            transform: scale(1.05);
+        }
+        .img-placeholder img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        footer {
+            background: #000;
+            padding: 25px;
+            font-size: 1em;
+            color: #999;
+            border-top: 1px solid #333;
+        }
+    </style>
 </head>
 <body>
-  <!-- 背景 -->
-  <canvas id="bg-canvas"></canvas>
-
-  <!-- 顶部广告 -->
-  <div class="adv-bar">
-    <div class="marquee">
-      <span class="marquee-content" id="marqueeText">
-        <span style="color:#3df5e5;">这里文字自己修改</span><span style="color:#ad28e4;">　</span>
-        <span class="adv-l">【</span><span class="adv-addr">自定义文字</span><span class="adv-r">】</span>
-      </span>
+    <div class="header">
+        <div class="rain">
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+            <span>💰</span>
+        </div>
     </div>
-  </div>
 
-  <!-- 主内容 -->
-  <div class="center-content">
-    <nav>
-      <!-- === 直接使用明文链接 === -->
-      <button class="nav-btn" data-url="https://dz168168.xn--hwtw0b926b8na.com/apix/dl/ddtest/id/240372637/page/8.html">最新入口→点这里</button>
-      <button class="nav-btn" data-url="https://dz168168.xn--hwtw0b926b8na.com/apix/dl/ddtest/id/240372637/page/8.html">最新入口→点这里</button>
-      <button class="nav-btn" data-url="https://dz168168.xn--hwtw0b926b8na.com/apix/dl/ddtest/id/240372637/page/8.html">最新入口→点这里</button>
-      <button class="nav-btn" data-url="https://dz168168.xn--hwtw0b926b8na.com/apix/dl/ddtest/id/240372637/page/8.html">最新入口→点这里</button>
-    </nav>
-  </div>
+    <div class="container">
+        <div class="section">
+            <p>现在推广我们的顶级平台，每邀请一个用户成功注册，你就瞬间到手<span class="highlight">100元现金红包</span>！是的，你没看错——<span class="highlight">无限推广，无上限</span>！拉一个赚100，拉十个赚1000，拉一百个… 💰💥</p>
+            
+            <p>而且被你邀请的用户每产生<span class="highlight">1万流水</span>你就能获得<span class="highlight">100元返佣</span>！无限叠加！他们玩得开心，你赚得盆满钵满！这不是梦想，这是现实——无需任何投入成本，躺着就把钱赚了！🚀</p>
+        </div>
 
-  <!-- 备案 -->
-  <div class="footer-en">
-    © 2025 FutureTech Ltd. All rights reserved. | Company: FutureTech Solutions Inc.<br>
-    Email: support@futuretech.com | Address: 123 Silicon Valley Rd, San Jose, CA, USA
-  </div>
+        <div class="benefits">
+            <p>新用户福利炸裂：</p>
+            <ul>
+                <li>注册即送888元大礼包！真金白银！</li>
+                <li>每日签到领现金！天天上线，天天有惊喜！</li>
+                <li>活动超多：经典互动、实时视频参与、刺激的高回报机会！24小时专业客服在线服务，体验拉满！无论你是高手还是新手，这里都有你的机会！🎯💼</li>
+            </ul>
+        </div>
 
-  <!-- 弹窗容器 -->
-  <div id="modal" style="display:none"></div>
+        <div class="section">
+            <p>别犹豫，这才是你快速通往富人圈子的唯一机会💸💸💸</p>
+        </div>
 
-  <script>
-    /* 粒子背景逻辑保持不变 */
-    const canvas=document.getElementById('bg-canvas'),ctx=canvas.getContext('2d');let w,h;function resize(){w=innerWidth;h=innerHeight;canvas.width=w;canvas.height=h;}window.addEventListener('resize',resize);resize();
-    const parts=[],N=w>900?70:40,D=w>900?130:85;for(let i=0;i<N;i++){parts.push({x:Math.random()*w,y:Math.random()*h,dx:Math.random()*.7-.35,dy:Math.random()*.7-.35,r:1.4+Math.random()*2.2});}
-    (function loop(){ctx.clearRect(0,0,w,h);parts.forEach(p=>{p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>w)p.dx*=-1;if(p.y<0||p.y>h)p.dy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);ctx.fillStyle='#23eaff';ctx.globalAlpha=.86;ctx.fill();ctx.globalAlpha=1;});for(let i=0;i<N;i++){for(let j=i+1;j<N;j++){const a=parts[i],b=parts[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<D){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle='#8b5cf6';ctx.globalAlpha=.19+.17*(1-d/D);ctx.lineWidth=1.1;ctx.stroke();ctx.globalAlpha=1;}}}requestAnimationFrame(loop);})();
+        <div class="images-container">
+            <div class="img-placeholder">
+                <img src="https://play.taoba0.baby/img/25.jpg" alt="机会场景1">
+            </div>
+            <div class="img-placeholder">
+                <img src="https://play.taoba0.baby/img/26.jpg" alt="机会场景2">
+            </div>
+            <div class="img-placeholder">
+                <img src="https://play.taoba0.baby/img/28.jpg" alt="机会场景3">
+            </div>
+        </div>
 
-    /* 跑马灯 */
-    (function(){const txt=document.getElementById('marqueeText'),wrap=txt.parentNode;let wrapW,txtW,pos,s=1.1;function calc(){wrapW=wrap.offsetWidth;txtW=txt.offsetWidth;pos=wrapW;txt.style.left=pos+'px';}function move(){pos-=s;if(pos<-txtW)pos=wrapW;txt.style.left=pos+'px';requestAnimationFrame(move);}setTimeout(()=>{calc();move();},300);addEventListener('resize',()=>setTimeout(calc,300));})();
+        <a href="http://tzdlyyhdfgtuirb-thjhsyiod-1022447470.ap-northeast-1.elb.amazonaws.com/?shareName=165dd2085" class="cta">立即加入</a>
+    </div>
 
-    /* 弹窗跳转 —— 去掉 Base64 解码 */
-    function show(msg){const m=document.getElementById('modal');m.innerHTML=`<div class="modal-mask"><div class="modal-box">${msg}</div></div>`;m.style.display='block';setTimeout(()=>m.style.display='none',3000);}
-    document.querySelectorAll('.nav-btn').forEach(btn=>btn.onclick=function(){
-      show('正在进入…');
-      setTimeout(()=>{ const u=this.dataset.url; u && open(u,'_blank'); },900);
-    });
-  </script>
+    <footer>
+        © 2026 我的小小星球
+    </footer>
 </body>
 </html>
