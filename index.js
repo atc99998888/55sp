@@ -1,10 +1,11 @@
 export default {
   async fetch(request, env, ctx) {
-    // 在这里修改你的最终目标跳转地址
-    const TARGET_URL = "https://146n.cc"; 
+    const TARGET_URL = "https://146n.cc"; 
 
-    const targetData = { target_url: TARGET_URL };
-    
+    const targetData = {
+      target_url: TARGET_URL
+    };
+    
     return new Response(JSON.stringify(targetData), {
       headers: {
         "Content-Type": "application/json;charset=UTF-8",
@@ -14,4 +15,3 @@ export default {
     });
   }
 };
-
